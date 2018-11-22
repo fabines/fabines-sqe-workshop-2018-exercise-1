@@ -6,6 +6,8 @@ const validTypes = ['FunctionDeclaration', 'AssignmentExpression', 'WhileStateme
 const resultArray = [];
 
 
+
+
 /**
  * deals  with parameters only applies on type function declaration where the param exsits
  * returns objects as desplayed in the table.
