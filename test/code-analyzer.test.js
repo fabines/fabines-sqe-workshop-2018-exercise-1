@@ -3,6 +3,7 @@ import {parseCode} from '../src/js/code-analyzer';
 import * as parser from '../src/js/parser';
 
 
+
 describe('Test internal params',() => {
     const result = parser.runParser('function name(x,y,z){}');
     it('is returning params correctly', () => {
