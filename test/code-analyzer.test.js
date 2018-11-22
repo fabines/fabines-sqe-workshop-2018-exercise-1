@@ -1,5 +1,4 @@
 import assert from 'assert';
-import {parseCode} from '../src/js/code-analyzer';
 import * as parser from '../src/js/parser';
 
 

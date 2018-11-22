@@ -1,4 +1,4 @@
-import $ from 'jquery';
+
 import {parseCode} from './code-analyzer';
 //all types of expressions to go through
 const validTypes = ['FunctionDeclaration', 'AssignmentExpression', 'WhileStatement', 'ReturnStatement',
