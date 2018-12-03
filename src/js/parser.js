@@ -1,4 +1,3 @@
-
 import {parseCode} from './code-analyzer';
 //all types of expressions to go through
 const validTypes = ['FunctionDeclaration', 'AssignmentExpression', 'WhileStatement', 'ReturnStatement',
@@ -61,7 +60,6 @@ function getCompoundValue(object, currentValue) {
     }
     const {left, right, operator} = object;
     return `${getCompoundValue(left,currentValue)} ${operator} ${getCompoundValue(right,currentValue)}`;
-
 }
 /**
  * if the boolean value prefix is true then ++ is the left side else it is on the right
@@ -96,7 +94,7 @@ function getValue(type, rightOperand,object) {
     }
     if(type === 'ReturnStatement') {
         const {operator='', type:argumentType, argument} = object.argument;
-        return argumentType === 'UnaryExpression' ? `${operator}${argument.value}` : getCompoundValue(object.argument, operator);
+        return argumentType === 'UnaryExpression'?`${operator}${argument.value}`:getCompoundValue(object.argument,operator);
         // if(argumentType === 'UnaryExpression'){
         //     return operator + argument.value;
         // }
@@ -108,7 +106,6 @@ function getValue(type, rightOperand,object) {
     }
     return '';
 }
-
 /**
  * integrates the condition depending on the statement
  * @param type
@@ -154,7 +151,7 @@ function mapParsedCode(objects) {
     return objects.map((object) => {
         let condition = '';
         const {loc: {start: {line}}, type, name = '', id = {}, test = {} ,init='', update=''} = object;
-        let nameCol = name || id.name || '';
+        let nameCol = getName(name,id);
         if (condinalStatements.includes(type)) {
             condition = getConditionalStatement(type,init,test,update);
         }
@@ -164,10 +161,12 @@ function mapParsedCode(objects) {
         return {line, type, name: nameCol, condition, value};
     });
 }
+
+function getName(name,id){return name || id.name || '';}
+
 function getNameCol(object){
     return object.name || getCompoundValue(object);
 }
-
 /**
  * recursive function which creates the objects for the map function
  * @param jsonObj
@@ -186,7 +185,6 @@ function traverse(jsonObj) {
         }
     });
 }
-
 /**
  * main function creates the table
  * @param code
@@ -199,11 +197,8 @@ function runParser(code) {
     const paramsRows = getParams(resultArray[0]);
     table.splice(1,0,...paramsRows);
     resultArray.length = 0 ;
-    // $('#parsedCode').val(JSON.stringify(parsedCode, null, 2));
     return table;
 }
-
-
 export{
     traverse,
     mapParsedCode,
