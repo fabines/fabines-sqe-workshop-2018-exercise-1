@@ -4,10 +4,6 @@ import {parseCode} from './code-analyzer';
 const validTypes = ['FunctionDeclaration', 'AssignmentExpression', 'WhileStatement', 'ReturnStatement',
     'UpdateExpression','ForStatement','IfStatement','VariableDeclarator','params'];
 const resultArray = [];
-
-
-
-
 /**
  * deals  with parameters only applies on type function declaration where the param exsits
  * returns objects as desplayed in the table.
@@ -41,7 +37,7 @@ function getMemberExpression(memberExpression){
  * @param currentValue
  * @returns {*}
  */
-function valueName(name,stringValue,currentValue){
+function valueName(name='',stringValue,currentValue=''){
     return currentValue + (name || stringValue);
 }
 
@@ -63,8 +59,8 @@ function getCompoundValue(object, currentValue) {
     if(name || stringValue){
         return valueName(name,stringValue,currentValue);
     }
-    const {left='', right='', operator=''} = object;
-    return `${getCompoundValue(left,currentValue)}${operator}${getCompoundValue(right,currentValue)}`;
+    const {left, right, operator} = object;
+    return `${getCompoundValue(left,currentValue)} ${operator} ${getCompoundValue(right,currentValue)}`;
 
 }
 /**
@@ -122,16 +118,27 @@ function getValue(type, rightOperand,object) {
  * @returns {*}
  */
 function getConditionalStatement(type,init,test,update){
-    var condition = getCompoundValue(init, '');
+    let condition = '';
+    if(init.type=='VariableDeclaration') {
+        condition = getInitValue(init);
+    } else{
+        condition = getCompoundValue(init, '');
+    }
     if(condition) condition+= ';';
     condition += getCompoundValue(test, '');
     if(update) condition += ';'+ getValue('UpdateExpression','',update);
     return condition;
 }
+
+function getInitValue(init){
+    const varName = init.declarations[0].id.name;
+    const value = getCompoundValue(init.declarations[0].init);
+    return `${varName} = ${value}`;
+}
 function getValueOfVariableDec(type,object){
     if(type === 'VariableDeclarator'){
         if(object.init){
-            return object.init.argument ? `${object.init.operator}${object.init.argument.value}` :object.init.value;
+            return object.init.argument ? `${object.init.operator}${object.init.argument.value}` :getCompoundValue(object.init, '');
         }
         return '';
     }
@@ -147,15 +154,18 @@ function mapParsedCode(objects) {
     return objects.map((object) => {
         let condition = '';
         const {loc: {start: {line}}, type, name = '', id = {}, test = {} ,init='', update=''} = object;
-        let nameCol = name || id.name;
+        let nameCol = name || id.name || '';
         if (condinalStatements.includes(type)) {
             condition = getConditionalStatement(type,init,test,update);
         }
-        if(type == 'AssignmentExpression') nameCol = object.left.name;
-
+        if(type == 'AssignmentExpression')
+            nameCol = getNameCol(object.left);
         var value = getValue(type, object.right, object) || getValueOfVariableDec(type,object);
         return {line, type, name: nameCol, condition, value};
     });
+}
+function getNameCol(object){
+    return object.name || getCompoundValue(object);
 }
 
 /**

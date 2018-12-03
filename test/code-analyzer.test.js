@@ -53,7 +53,7 @@ describe('Test  function getConditionalStatement',() => {
         const test = {type: 'BinaryExpression', operator: '<=', left: {type: 'Identifier', name: 'low', loc: {start: {line: 5, column: 11},end: {line: 5, column: 14}}}, right: {type: 'Identifier', name: 'high', loc: {start:{line: 5, column: 18},end:{line: 5, column: 22}}}, loc: {start: {line: 5, column: 11},end: {line: 5, column: 22}}};
         const update = '';
         const result = parser.getConditionalStatement(type,init,test,update);
-        assert.equal(result,'low<=high');
+        assert.equal(result,'low <= high');
     });
     it('is returning value correctly for', () => {
         const type ='ForStatement';
@@ -61,7 +61,7 @@ describe('Test  function getConditionalStatement',() => {
         const test = {type:'BinaryExpression',operator:'<=',left:{type:'Identifier',name:'i',loc:{start:{line:5,column:17},end:{line:5,column:18}}},right:{type:'Identifier',name:'high',loc:{start:{line:5,column:21},end:{line:5,column:25}}},loc:{start:{line:5,column:17},end:{line:5,column:25}}};
         const update = {type:'UpdateExpression',operator:'--',argument:{type:'Identifier',name:'i',loc:{start:{line:5,column:26},end:{line:5,column:27}}},prefix:false,loc:{start:{line:5,column:26},end:{line:5,column:29}}};
         const result = parser.getConditionalStatement(type,init,test,update);
-        assert.equal(result,'i<=high;i--');//todo why isnt the var i=0 presenting
+        assert.equal(result,'i = 0;i <= high;i--');
     });
 });
 
@@ -69,7 +69,7 @@ describe('Test  functions ',() => {
     const result = parser.runParser('function binarySearch(){\nlet low,X,V,n, high, mid;\nlow = 0;\nhigh = n - 1;\nfor(i=0;low <= high;i++) {\nmid = (low + high)/2;\nif (X.a < V[mid])\nhigh = mid - 1;\nelse if (X > V[mid])\nlow = mid + 1;\nelse\nreturn mid;\n}\nreturn -1;\n}');
     it('is returning value correctly memberExpression v[x], v.x', () => {
         const first = result[11].condition;
-        assert.equal(first,'X.a<V[mid]');
+        assert.equal(first,'X.a < V[mid]');
     });
     it('is returning value correctly Assignment', () => {
         const second = result[8].name;
@@ -77,7 +77,7 @@ describe('Test  functions ',() => {
     });
     it('is returning value correctly "IfStatement"', () => {
         const third = result[13].condition;
-        assert.equal(third,'X>V[mid]');
+        assert.equal(third,'X > V[mid]');
     });
     it('is returning value correctly "Unary"', () => {
         const forth = result[16].value;
@@ -104,6 +104,22 @@ describe('Test  functions unary and variableDeclarator ',() => {
         assert.equal(second, '-2');
     });
 });
+describe('Test  functions v[mid]=v[mid+1] ',() => {
+    it('is returning value correctly unary', () => {
+        const result = parser.runParser('function Sort(arr){\n' +
+            ' for (let i=0; i<arr.length-(i+1); j++){\n' +
+            'let temp=arr[j];\n' +
+            'arr[j]=arr[j+1];\n' +
+            '}\n' +
+            'return arr;\n' +
+            '}');
+        const second = result[4].name;
+        const first = result[4].value;
+        assert.equal(second, 'arr[j]');
+        assert.equal(first, 'arr[j + 1]')
+    });
+});
+
 
 
 
